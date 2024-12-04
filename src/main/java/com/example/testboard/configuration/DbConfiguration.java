@@ -34,4 +34,16 @@ public class DbConfiguration {
         return dataSource;
     }
 
+    // MyBatis 설정 (1) : SqlSessionFactory <-- SqlSessionFactoryBean
+    public SqlSessionFactory sqlSessionFactory() throws Exception {
+        SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
+
+        return sqlSessionFactoryBean.getObject();
+    }
+
+    // MyBatis 설정 (2) : SqlSessionTemplate <-- SqlSessionFactory
+    public SqlSessionTemplate sqlSessionTemplate() throws Exception {
+        return new SqlSessionTemplate(sqlSessionFactory());
+    }
+
 }
