@@ -1,0 +1,15 @@
+testboard
+    src/main/java
+        com.example.testboard
+            configuration
+                DbConfiguration.java
+            dto
+                MemberDto.java
+            mapper
+                MemberMapper.java (Interface)
+    src/resources
+        mapper
+            MemberMapper.xml
+        application.properties
+    src/test/java
+        com.example.testboard
