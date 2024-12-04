@@ -5,7 +5,9 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -19,6 +21,9 @@ import javax.sql.DataSource;
 @Configuration
 @PropertySource("classpath:/application.properties")
 public class DbConfiguration {
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     /*
      * Hikari 설정 (1)
@@ -53,18 +58,49 @@ public class DbConfiguration {
         return dataSource;
     }
 
-    // MyBatis 설정 (1) : SqlSessionFactory <-- SqlSessionFactoryBean
-//    @Bean
-    public SqlSessionFactory sqlSessionFactory() throws Exception {
+    /*
+     * MyBatis 설정 (1)
+     *
+     * SqlSessionFactory 객체 생성
+     * SqlSessionFactory 생성을 위해서 내부의 SqlSessionFactoryBean 을 사용
+     * 이때, 데이터소스 객체를 넘겨 받아서 처리해도 되고, 아니면 setDataSource(dataSource()) 이렇게 해도 됨.
+     *
+     * 기본적인 설정 3가지
+     *      setDataSource           : 빌드된 DataSource 를 셋팅.
+     *      setMapperLocations      : SQL 구문이 작성된 *Mapper.xml 의 경로를 등록.
+     *      setTypeAliasesPackage   : 인자로 Alias 대상 클래스가 위치한 패키지 경로.
+     *
+     * 주의사항!
+     * SqlSessionFactory 에 저장할 config 설정 시 Mapper 에서 사용하고자하는 DTO, VO, Entity 에 대해서 setTypeAliasesPackage 지정 필요.
+     * 만약 지정해주지 않는다면 aliases 찾지 못한다는 오류가 발생할 수 있음.
+     */
+    @Bean
+    public SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {
         SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
+        sqlSessionFactoryBean.setDataSource(dataSource);
+        sqlSessionFactoryBean.setMapperLocations(applicationContext.getResources("classpath:/mapper/**/*Mapper.xml"));
+        /*
+         * 매퍼에 대한 리소스는 어디서 가져오지?
+         *      - ApplicationContext 객체에서 가져올 수 있다.
+         *      - ApplicationContext 는 쉽게말해 프레임워크 컨테이너라도 생각하면 됨.
+         *      - ApplicationContext 는 애플리케이션이 시작해서 끝나는 그 순간까지 이 애플리케이션에서 필요한 모든 자원들을 모아놓고 관리.
+         */
+        sqlSessionFactoryBean.setTypeAliasesPackage("com.example.testboard");
 
         return sqlSessionFactoryBean.getObject();
     }
 
-    // MyBatis 설정 (2) : SqlSessionTemplate <-- SqlSessionFactory
-//    @Bean
-    public SqlSessionTemplate sqlSessionTemplate() throws Exception {
-        return new SqlSessionTemplate(sqlSessionFactory());
+    /*
+     * MyBatis 설정 (2) : SqlSessionTemplate <-- SqlSessionFactory
+     *
+     * SqlSessionTemplate 객체 생성 <-- SqlSessionFactory
+     * 넘겨받은 sqlSessionFactory 를 통해서 sqlSessionTemplate 객체 생성 및 리턴.
+     * SQL 구문의 실행과 트랜잭션 등을 관리하는 가장 작업을 많이하는 객체
+     * MyBatis 의 sqlSession 객체가 Spring + Mybatis 연동 모듈에서는 sqlSessionTemplate 이 대체.
+     */
+    @Bean
+    public SqlSessionTemplate sqlSessionTemplate(SqlSessionFactory sqlSessionFactory) throws Exception {
+        return new SqlSessionTemplate(sqlSessionFactory);
     }
 
 }
