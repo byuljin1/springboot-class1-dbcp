@@ -1,1 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "mybais.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.testboard.mapper.MemberMapper">
+
+    <insert id="insertMember" parameterType="MemberDto">
+<!--        INSERT INTO member (name, id, phone) VALUES ('이순신', 'mr.soon', '010-111-2222');-->
+        Insert INTO member (
+            name,
+            id,
+            phone
+        ) VALUES (
+            #{name},
+            #{id},
+            #{phone}
+        );
+    </insert>
+
+</mapper>
