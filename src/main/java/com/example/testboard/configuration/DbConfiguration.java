@@ -85,7 +85,7 @@ public class DbConfiguration {
          *      - ApplicationContext 는 쉽게말해 프레임워크 컨테이너라도 생각하면 됨.
          *      - ApplicationContext 는 애플리케이션이 시작해서 끝나는 그 순간까지 이 애플리케이션에서 필요한 모든 자원들을 모아놓고 관리.
          */
-        sqlSessionFactoryBean.setTypeAliasesPackage("com.example.testboard");
+        sqlSessionFactoryBean.setTypeAliasesPackage("com.example.testboard.dto");
 
         return sqlSessionFactoryBean.getObject();
     }
